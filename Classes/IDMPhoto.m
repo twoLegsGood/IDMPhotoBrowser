@@ -125,44 +125,44 @@ caption = _caption;
 }
 
 - (void)loadUnderlyingImageAndNotify {
-//    NSAssert([[NSThread currentThread] isMainThread], @"This method must be called on the main thread.");
-//    _loadingInProgress = YES;
-//    if (self.underlyingImage) {
-//        // Image already loaded
-//        [self imageLoadingComplete];
-//    } else {
-//        if (_photoPath) {
-//            // Load async from file
-//            [self performSelectorInBackground:@selector(loadImageFromFileAsync) withObject:nil];
-//        } else if (_photoURL) {
-//            // Load async from web (using AFNetworking)
-//            NSURLRequest *request = [[NSURLRequest alloc] initWithURL:_photoURL
-//                                                          cachePolicy:NSURLRequestReturnCacheDataElseLoad
-//                                                      timeoutInterval:0];
-//            
-//            AFHTTPRequestOperation *op = [[AFHTTPRequestOperation alloc] initWithRequest:request];
-//            op.responseSerializer = [AFImageResponseSerializer serializer];
-//
-//            [op setCompletionBlockWithSuccess:^(AFHTTPRequestOperation *operation, id responseObject) {
-//                UIImage *image = responseObject;
-//                self.underlyingImage = image;
-//                [self performSelectorOnMainThread:@selector(imageLoadingComplete) withObject:nil waitUntilDone:NO];
-//            } failure:^(AFHTTPRequestOperation *operation, NSError *error) { }];
-//            
-//            [op setDownloadProgressBlock:^(NSUInteger bytesRead, long long totalBytesRead, long long totalBytesExpectedToRead) {
-//                CGFloat progress = ((CGFloat)totalBytesRead)/((CGFloat)totalBytesExpectedToRead);
-//                if (self.progressUpdateBlock) {
-//                    self.progressUpdateBlock(progress);
-//                }
-//            }];
-//            
-//            [[NSOperationQueue mainQueue] addOperation:op];
-//        } else {
-//            // Failed - no source
-//            self.underlyingImage = nil;
-//            [self imageLoadingComplete];
-//        }
-//    }
+    NSAssert([[NSThread currentThread] isMainThread], @"This method must be called on the main thread.");
+    _loadingInProgress = YES;
+    if (self.underlyingImage) {
+        // Image already loaded
+        [self imageLoadingComplete];
+    } else {
+        if (_photoPath) {
+            // Load async from file
+            [self performSelectorInBackground:@selector(loadImageFromFileAsync) withObject:nil];
+        } else if (_photoURL) {
+            // Load async from web (using AFNetworking)
+            NSURLRequest *request = [[NSURLRequest alloc] initWithURL:_photoURL
+                                                          cachePolicy:NSURLRequestReturnCacheDataElseLoad
+                                                      timeoutInterval:0];
+            
+            AFHTTPRequestOperation *op = [[AFHTTPRequestOperation alloc] initWithRequest:request];
+            op.responseSerializer = [AFImageResponseSerializer serializer];
+
+            [op setCompletionBlockWithSuccess:^(AFHTTPRequestOperation *operation, id responseObject) {
+                UIImage *image = responseObject;
+                self.underlyingImage = image;
+                [self performSelectorOnMainThread:@selector(imageLoadingComplete) withObject:nil waitUntilDone:NO];
+            } failure:^(AFHTTPRequestOperation *operation, NSError *error) { }];
+            
+            [op setDownloadProgressBlock:^(NSUInteger bytesRead, long long totalBytesRead, long long totalBytesExpectedToRead) {
+                CGFloat progress = ((CGFloat)totalBytesRead)/((CGFloat)totalBytesExpectedToRead);
+                if (self.progressUpdateBlock) {
+                    self.progressUpdateBlock(progress);
+                }
+            }];
+            
+            [[NSOperationQueue mainQueue] addOperation:op];
+        } else {
+            // Failed - no source
+            self.underlyingImage = nil;
+            [self imageLoadingComplete];
+        }
+    }
 }
 
 // Release if we can get it again from path or url
@@ -176,37 +176,37 @@ caption = _caption;
 
 #pragma mark - Async Loading
 
-/*- (UIImage *)decodedImageWithImage:(UIImage *)image {
-    CGImageRef imageRef = image.CGImage;
-    // System only supports RGB, set explicitly and prevent context error
-    // if the downloaded image is not the supported format
-    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-    
-    CGContextRef context = CGBitmapContextCreate(NULL,
-                                                 CGImageGetWidth(imageRef),
-                                                 CGImageGetHeight(imageRef),
-                                                 8,
-                                                 // width * 4 will be enough because are in ARGB format, don't read from the image
-                                                 CGImageGetWidth(imageRef) * 4,
-                                                 colorSpace,
-                                                 // kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Little
-                                                 // makes system don't need to do extra conversion when displayed.
-                                                 kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Little);
-    CGColorSpaceRelease(colorSpace);
-    
-    if ( ! context) {
-        return nil;
-    }
-    
-    CGRect rect = (CGRect){CGPointZero, CGImageGetWidth(imageRef), CGImageGetHeight(imageRef)};
-    CGContextDrawImage(context, rect, imageRef);
-    CGImageRef decompressedImageRef = CGBitmapContextCreateImage(context);
-    CGContextRelease(context);
-    
-    UIImage *decompressedImage = [[UIImage alloc] initWithCGImage:decompressedImageRef];
-    CGImageRelease(decompressedImageRef);
-    return decompressedImage;
-}*/
+//- (UIImage *)decodedImageWithImage:(UIImage *)image {
+//    CGImageRef imageRef = image.CGImage;
+//    // System only supports RGB, set explicitly and prevent context error
+//    // if the downloaded image is not the supported format
+//    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+//    
+//    CGContextRef context = CGBitmapContextCreate(NULL,
+//                                                 CGImageGetWidth(imageRef),
+//                                                 CGImageGetHeight(imageRef),
+//                                                 8,
+//                                                 // width * 4 will be enough because are in ARGB format, don't read from the image
+//                                                 CGImageGetWidth(imageRef) * 4,
+//                                                 colorSpace,
+//                                                 // kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Little
+//                                                 // makes system don't need to do extra conversion when displayed.
+//                                                 kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Little);
+//    CGColorSpaceRelease(colorSpace);
+//    
+//    if ( ! context) {
+//        return nil;
+//    }
+//    
+//    CGRect rect = (CGRect){CGPointZero, CGImageGetWidth(imageRef), CGImageGetHeight(imageRef)};
+//    CGContextDrawImage(context, rect, imageRef);
+//    CGImageRef decompressedImageRef = CGBitmapContextCreateImage(context);
+//    CGContextRelease(context);
+//    
+//    UIImage *decompressedImage = [[UIImage alloc] initWithCGImage:decompressedImageRef];
+//    CGImageRelease(decompressedImageRef);
+//    return decompressedImage;
+//}
 
 - (UIImage *)decodedImageWithImage:(UIImage *)image {
     if (image.images)
@@ -274,6 +274,7 @@ caption = _caption;
     @autoreleasepool {
         @try {
             self.underlyingImage = [UIImage imageWithContentsOfFile:_photoPath];
+            
             if (!_underlyingImage) {
                 //IDMLog(@"Error loading photo from path: %@", _photoPath);
             }
@@ -286,6 +287,7 @@ caption = _caption;
 
 // Called on main
 - (void)imageLoadingComplete {
+    NSLog(@"\n\nphotoPath Load Complete: %@\n",_photoPath);
     NSAssert([[NSThread currentThread] isMainThread], @"This method must be called on the main thread.");
     // Complete so notify
     _loadingInProgress = NO;
