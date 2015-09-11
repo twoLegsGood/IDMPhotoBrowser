@@ -375,10 +375,6 @@ NSLocalizedStringFromTableInBundle((key), nil, [NSBundle bundleWithPath:[[NSBund
 
 - (void)performPresentAnimation {
     self.view.alpha = 0.0f;
-    
-    UIImage *imageFromView = _scaleImage ? _scaleImage : [self getImageFromView:_senderViewForAnimation];
-    imageFromView = [self rotateImageToCurrentOrientation:imageFromView];
-    
     _senderViewOriginalFrame = [_senderViewForAnimation.superview convertRect:_senderViewForAnimation.frame toView:nil];
     
     CGRect screenBound = [[UIScreen mainScreen] bounds];
@@ -389,49 +385,20 @@ NSLocalizedStringFromTableInBundle((key), nil, [NSBundle bundleWithPath:[[NSBund
     fadeView.backgroundColor = [UIColor clearColor];
     [_applicationWindow addSubview:fadeView];
     
-    UIImageView *resizableImageView = [[UIImageView alloc] initWithImage:imageFromView];
-    resizableImageView.frame = _senderViewOriginalFrame;
-    resizableImageView.clipsToBounds = YES;
-    resizableImageView.contentMode = UIViewContentModeScaleAspectFill;
-    resizableImageView.backgroundColor = [UIColor colorWithWhite:(_useWhiteBackgroundColor) ? 1 : 0 alpha:1];
-    [_applicationWindow addSubview:resizableImageView];
     _senderViewForAnimation.hidden = YES;
-    
-    void (^completion)() = ^() {
-        self.view.alpha = 1.0f;
-        resizableImageView.backgroundColor = [UIColor colorWithWhite:(_useWhiteBackgroundColor) ? 1 : 0 alpha:1];
-        [fadeView removeFromSuperview];
-        [resizableImageView removeFromSuperview];
-    };
     
     [UIView animateWithDuration:_animationDuration animations:^{
         fadeView.backgroundColor = self.useWhiteBackgroundColor ? [UIColor whiteColor] : [UIColor blackColor];
+        self.view.alpha = 1.0f;
+        [fadeView removeFromSuperview];
     } completion:nil];
-    
-    float scaleFactor = (imageFromView ? imageFromView.size.width : screenWidth) / screenWidth;
-    CGRect finalImageViewFrame = CGRectMake(0, (screenHeight/2)-((imageFromView.size.height / scaleFactor)/2), screenWidth, imageFromView.size.height / scaleFactor);
-    
-    if(_usePopAnimation)
-    {
-        [self animateView:resizableImageView
-                  toFrame:finalImageViewFrame
-               completion:completion];
-    }
-    else
-    {
-        [UIView animateWithDuration:_animationDuration animations:^{
-            resizableImageView.layer.frame = finalImageViewFrame;
-        } completion:^(BOOL finished) {
-            completion();
-        }];
-    }
 }
 
 - (void)performCloseAnimationWithScrollView:(IDMZoomingScrollView*)scrollView {
-    float fadeAlpha = 1 - abs(scrollView.frame.origin.y)/scrollView.frame.size.height;
+    float fadeAlpha = 1 - fabs(scrollView.frame.origin.y)/scrollView.frame.size.height;
     
     UIImage *imageFromView = [scrollView.photo underlyingImage];
-    //imageFromView = [self rotateImageToCurrentOrientation:imageFromView];
+    imageFromView = [self rotateImageToCurrentOrientation:imageFromView];
     
     CGRect screenBound = [[UIScreen mainScreen] bounds];
     CGFloat screenWidth = screenBound.size.width;
@@ -522,14 +489,6 @@ NSLocalizedStringFromTableInBundle((key), nil, [NSBundle bundleWithPath:[[NSBund
     [button setContentMode:UIViewContentModeCenter];
     [button setFrame:CGRectMake(0,0, image.size.width, image.size.height)];
     return button;
-}
-
-- (UIImage*)getImageFromView:(UIView *)view {
-    UIGraphicsBeginImageContextWithOptions(view.bounds.size, YES, 2);
-    [view.layer renderInContext:UIGraphicsGetCurrentContext()];
-    UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-    return image;
 }
 
 - (UIViewController *)topviewController
